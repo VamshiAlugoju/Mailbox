@@ -1,0 +1,28 @@
+{
+  "name": "mail",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "frontend": "cd frontend && npm run dev"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@material-tailwind/react": "^2.1.10",
+    "@tiptap/extension-color": "^2.8.0",
+    "@tiptap/extension-text-style": "^2.8.0",
+    "@tiptap/pm": "^2.8.0",
+    "@tiptap/react": "^2.8.0",
+    "@tiptap/starter-kit": "^2.8.0",
+    "draft-js": "^0.11.7",
+    "lucide-react": "^0.453.0",
+    "react-draft-wysiwyg": "^1.15.0",
+    "react-router-dom": "^6.27.0",
+    "react-simple-wysiwyg": "^3.1.2"
+  },
+  "devDependencies": {
+    "@types/react-draft-wysiwyg": "^1.13.8"
+  }
+}
