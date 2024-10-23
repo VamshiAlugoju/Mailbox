@@ -58,6 +58,8 @@ function Outbox() {
                   senderId={item.from._id}
                   read={false}
                   subject={item.subject}
+                  currentPage="Outbox"
+                  mailId={item._id}
                 />
               );
             })}

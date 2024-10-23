@@ -1,6 +1,10 @@
-import React from "react";
-import { ArrowLeft, Star, Trash2, Mail, MoreVertical } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { ArrowLeft, Star, Trash2, Loader2 } from "lucide-react";
 import NavigationBar from "../../componets/NavigationBar";
+import { useNavigate, useParams } from "react-router-dom";
+import { getMailDetails } from "../../utils/handlers";
+import { Mail } from "../../utils/types/types";
+import { useLocation } from "react-router-dom";
 
 // Sample email data structure
 const emailData = {
@@ -46,83 +50,115 @@ const IconButton = ({
 );
 
 const Mailpage = () => {
+  const params = useParams();
+  const [loading, setLoading] = useState(true);
+  const [mailDetails, setMailDetails] = useState<Mail | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    async function iffe() {
+      console.log("came here", params);
+      setLoading(true);
+      if (params.mailid) {
+        const response = await getMailDetails(params.mailid);
+        setMailDetails(response);
+      }
+
+      setLoading(false);
+    }
+    iffe();
+  }, []);
   return (
     <div className="w-full">
       <NavigationBar />
-      <div className="max-w-4xl mx-auto p-4 bg-white">
-        {/* Email Header with Actions */}
-        <div className="flex items-center gap-4 mb-6 px-2">
-          <IconButton>
-            <ArrowLeft className="h-5 w-5" />
-          </IconButton>
-          <div className="flex-grow">
-            <div className="flex items-center gap-2">
-              {emailData.labels.map((label) => (
-                <span
-                  key={label}
-                  className="text-xs bg-gray-100 px-2 py-1 rounded"
+      {loading ? (
+        <div className="flex w-full h-full items-center justify-center mt-40">
+          <Loader2 />
+        </div>
+      ) : (
+        <>
+          {mailDetails ? (
+            <div className="max-w-4xl mx-auto p-4 bg-white">
+              {/* Email Header with Actions */}
+              <div className="flex items-center gap-4 mb-6 px-2">
+                <IconButton
+                  onClick={() => {
+                    navigate(-1);
+                  }}
                 >
-                  {label}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <IconButton>
-              <Trash2 className="h-5 w-5" />
-            </IconButton>
-            <IconButton>
-              <Mail className="h-5 w-5" />
-            </IconButton>
-            <IconButton>
-              <Star className="h-5 w-5" />
-            </IconButton>
-            <IconButton>
-              <MoreVertical className="h-5 w-5" />
-            </IconButton>
-          </div>
-        </div>
-
-        {/* Main Email Content */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6">
-            {/* Subject */}
-            <h1 className="text-2xl font-semibold mb-6">{emailData.subject}</h1>
-
-            {/* Sender Info */}
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
-                {emailData.sender.name.charAt(0)}
-              </div>
-              <div className="flex-grow">
-                <div className="flex items-baseline justify-between">
-                  <div>
-                    <span className="font-semibold">
-                      {emailData.sender.name}
+                  <ArrowLeft className="h-5 w-5" />
+                </IconButton>
+                <div className="flex-grow">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                      {location.state.prevPage}
                     </span>
-                    <span className="text-gray-500 text-sm ml-2">{`<${emailData.sender.email}>`}</span>
                   </div>
-                  <span className="text-gray-500 text-sm">
-                    {emailData.sender.timestamp}
-                  </span>
                 </div>
-                <div className="text-sm text-gray-500">to me</div>
+                <div className="flex gap-2">
+                  <IconButton>
+                    <Trash2 className="h-5 w-5" />
+                  </IconButton>
+
+                  <IconButton>
+                    <Star className="h-5 w-5" />
+                  </IconButton>
+                </div>
+              </div>
+
+              {/* Main Email Content */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-scroll">
+                <div className="p-6">
+                  {/* Subject */}
+                  <h1 className="text-2xl font-semibold mb-6">
+                    {mailDetails?.subject}
+                  </h1>
+
+                  {/* Sender Info */}
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
+                      {mailDetails.from.name.charAt(0)}
+                    </div>
+                    <div className="flex-grow">
+                      <div className="flex items-baseline justify-between">
+                        <div>
+                          <span className="font-semibold">
+                            {mailDetails.from.name}
+                          </span>
+                          <span className="text-gray-500 text-sm ml-2">{`<${mailDetails.from.email}>`}</span>
+                        </div>
+                        <span className="text-gray-500 text-sm">
+                          {/* change */}
+                          {emailData.sender.timestamp}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-500">to me</div>
+                    </div>
+                  </div>
+
+                  {/* Email Body */}
+                  <div
+                    className="prose max-w-none text-gray-800"
+                    style={{ maxHeight: "50vh" }}
+                  >
+                    <div
+                      dangerouslySetInnerHTML={{ __html: mailDetails.body }}
+                      style={{
+                        maxHeight: "50vh",
+                      }}
+                    ></div>
+                  </div>
+                </div>
               </div>
             </div>
-
-            {/* Email Body */}
-            <div className="prose max-w-none text-gray-800">
-              <p className="mb-4">{emailData.content.greeting}</p>
-              {emailData.content.body.split("\n\n").map((paragraph, index) => (
-                <p key={index} className="mb-4">
-                  {paragraph}
-                </p>
-              ))}
-              <p className="mb-4">{emailData.content.cta}</p>
+          ) : (
+            <div className="w-full h-full flex justify-center py-12">
+              <p>Unable to get Mail Detals</p>
             </div>
-          </div>
-        </div>
-      </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

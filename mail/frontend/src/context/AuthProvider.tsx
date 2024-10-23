@@ -16,6 +16,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = localStorage.getItem("token");
       if (token) {
         const currentUser = await getCurrentUser(token);
+        localStorage.setItem("user", JSON.stringify(currentUser));
         setUserId(currentUser._id);
         setIsLoggedin(true);
       } else {

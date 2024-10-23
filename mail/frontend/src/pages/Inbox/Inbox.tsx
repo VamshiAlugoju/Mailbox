@@ -4,9 +4,15 @@ import NavigationBar from "../../componets/NavigationBar";
 import { inbox } from "../../data";
 import { tab } from "@material-tailwind/react";
 import { Loader } from "lucide-react";
-import { getMyInbox } from "../../utils/handlers";
+import {
+  addToBookmarks,
+  getMyBookmarks,
+  getMyInbox,
+  removeFromBookmarks,
+} from "../../utils/handlers";
 import { Mail } from "../../utils/types/types";
 import { useNavigate } from "react-router-dom";
+import "./inbox.css";
 
 function Inbox() {
   const tabs = [
@@ -20,12 +26,20 @@ function Inbox() {
   const [activeTabIdx, setActiveTabIdx] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [inboxData, setInboxData] = useState<Mail[]>([]);
+  const [bookmarks, setBookMarks] = useState<Mail[]>([]);
+
   useEffect(() => {
     setIsLoading(true);
     (async () => {
-      const data = await getMyInbox();
+      if (activeTabIdx == 0) {
+        const data = await getMyInbox();
 
-      setInboxData(data);
+        setInboxData(data);
+      } else if (activeTabIdx == 1) {
+        const data = await getMyBookmarks();
+        console.log(data);
+        setBookMarks(data);
+      }
       setIsLoading(false);
     })();
   }, [activeTabIdx]);
@@ -51,19 +65,40 @@ function Inbox() {
             })}
           </div>
           <div className="">
-            {inboxData.map((item) => {
-              return (
-                <MessageListItem
-                  key={item._id}
-                  message={item.body}
-                  reciver={item.to.name}
-                  senderName={item.from.name}
-                  senderId={item.from._id}
-                  read={item.read}
-                  subject={item.subject}
-                />
-              );
-            })}
+            {tabs[activeTabIdx].name == "Inbox" &&
+              inboxData.map((item) => {
+                return (
+                  <MessageListItem
+                    key={item._id}
+                    message={item.body}
+                    reciver={item.to.name}
+                    senderName={item.from.name}
+                    senderId={item.from._id}
+                    read={item.read}
+                    subject={item.subject}
+                    mailId={item._id}
+                    currentPage="Inbox"
+                    showBookMark={true}
+                  />
+                );
+              })}
+            {tabs[activeTabIdx].name == "Bookmarks" &&
+              bookmarks.map((item) => {
+                return (
+                  <MessageListItem
+                    key={item._id}
+                    message={item.body}
+                    reciver={item.to.name}
+                    senderName={item.from.name}
+                    senderId={item.from._id}
+                    read={item.read}
+                    subject={item.subject}
+                    mailId={item._id}
+                    currentPage="Inbox"
+                    showBookMark={true}
+                  />
+                );
+              })}
           </div>
         </div>
       ) : (
@@ -107,6 +142,9 @@ type IMessageItem = {
   read: boolean;
   reciver: string;
   subject: string;
+  mailId: string;
+  currentPage: string;
+  showBookMark?: boolean;
 };
 export const MessageListItem = ({
   senderId,
@@ -115,9 +153,14 @@ export const MessageListItem = ({
   read,
   reciver,
   subject,
+  mailId,
+  currentPage,
+  showBookMark,
 }: IMessageItem) => {
-  const [isSelected, setIsSelected] = useState(false);
-  const [isStarred, setIsStarred] = useState(false);
+  const user = JSON.parse(localStorage.getItem("user")!);
+  const [isStarred, setIsStarred] = useState(
+    user.bookmarks.find((item: string) => item == mailId)
+  );
   const [showMessageOptions, setShowMessageOptions] = useState(false);
   const navigate = useNavigate();
   function handleHover() {
@@ -127,26 +170,37 @@ export const MessageListItem = ({
   return (
     <button
       onClick={() => {
-        navigate("/mail");
+        navigate(`/mail/${mailId}`, { state: { prevPage: currentPage } });
       }}
-      className={`w-full max-w-7xl mx-auto block ${
+      className={` w-full max-w-7xl mx-auto block ${
         !read ? "bg-white" : "bg-blue-50"
-      } hover:cursor-pointer hover:border-b-2 hover:bg-none hover:bg-gradient-to-r hover:from-blue-500 hover:to-red-500`}
-      onMouseEnter={handleHover}
-      onMouseLeave={handleHover}
+      }  mailboxitem`}
+      // onMouseEnter={handleHover}
+      // onMouseLeave={handleHover}
     >
-      <div className="flex items-center gap-4 p-2 hover:bg-gray-50 border-b border-gray-200 ">
+      <div className="flex items-center gap-4 p-2     ">
         {/* Star button */}
-        <button
-          onClick={() => setIsStarred(!isStarred)}
-          className="flex-shrink-0"
-        >
-          <Star
-            className={`h-5 w-5 ${
-              isStarred ? "fill-yellow-400 text-yellow-400" : "text-gray-400"
-            }`}
-          />
-        </button>
+        {showBookMark && (
+          <button
+            onClick={async (e) => {
+              e.stopPropagation();
+              if (isStarred) {
+                setIsStarred((prev: boolean) => !prev);
+                await removeFromBookmarks(mailId);
+              } else {
+                setIsStarred((prev: boolean) => !prev);
+                await addToBookmarks(mailId);
+              }
+            }}
+            className="flex-shrink-0 hover:bg-gray-200 p-1"
+          >
+            <Star
+              className={`h-5 w-5 ${
+                isStarred ? "fill-yellow-400 text-yellow-400" : "text-gray-400"
+              }`}
+            />
+          </button>
+        )}
         <div className="flex-grow min-w-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center min-w-0">
@@ -155,7 +209,9 @@ export const MessageListItem = ({
               </p>
               <div className="flex items-center gap-2">
                 <p className="font-medium text-gray-900 truncate">{subject}</p>
-                <p className="text-sm text-gray-600 truncate"> {message} </p>
+                <p className="text-sm text-gray-600 truncate">
+                  {message.slice(0, 100)}
+                </p>
               </div>
             </div>
           </div>

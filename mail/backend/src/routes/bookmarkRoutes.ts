@@ -6,6 +6,6 @@ const routes = Router()
 
 routes.post("/add/:id", addBookmark);
 routes.get("/get", getMyBookmarks);
-routes.delete("/remove/:id", removeBookmark);
+routes.post("/remove/:id", removeBookmark);
 
 export default routes;

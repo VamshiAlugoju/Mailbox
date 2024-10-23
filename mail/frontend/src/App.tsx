@@ -1,12 +1,6 @@
 import "./App.css";
 import Login from "./componets/Login";
-import {
-  createBrowserRouter,
-  Route,
-  BrowserRouter,
-  RouterProvider,
-  Routes,
-} from "react-router-dom";
+import { Route, BrowserRouter, Routes } from "react-router-dom";
 import Signup from "./componets/Signup";
 import AuthProvider from "./context/AuthProvider";
 import { useContext, useEffect } from "react";
@@ -15,49 +9,49 @@ import { useNavigate } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import ComposeMail from "./pages/Compose/ComposeMail";
 import Inbox from "./pages/Inbox/Inbox";
-import { Bounce, toast, ToastContainer } from "react-toastify";
+import { Bounce, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Outbox from "./pages/Outbox/Outbox";
 import Mailpage from "./pages/Mailpage/Mailpage";
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <FirstPage />,
-  },
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/signup",
-    element: <Signup />,
-  },
-  {
-    path: "/home",
-    element: (
-      <AuthGate>
-        <Home />
-      </AuthGate>
-    ),
-  },
-  {
-    path: "/inbox",
-    element: (
-      <AuthGate>
-        <Inbox />
-      </AuthGate>
-    ),
-  },
-  {
-    path: "/compose",
-    element: (
-      <AuthGate>
-        <ComposeMail />
-      </AuthGate>
-    ),
-  },
-]);
+// const router = createBrowserRouter([
+//   {
+//     path: "/",
+//     element: <FirstPage />,
+//   },
+//   {
+//     path: "/login",
+//     element: <Login />,
+//   },
+//   {
+//     path: "/signup",
+//     element: <Signup />,
+//   },
+//   {
+//     path: "/home",
+//     element: (
+//       <AuthGate>
+//         <Home />
+//       </AuthGate>
+//     ),
+//   },
+//   {
+//     path: "/inbox",
+//     element: (
+//       <AuthGate>
+//         <Inbox />
+//       </AuthGate>
+//     ),
+//   },
+//   {
+//     path: "/compose",
+//     element: (
+//       <AuthGate>
+//         <ComposeMail />
+//       </AuthGate>
+//     ),
+//   },
+// ]);
 
 function App() {
   return (
@@ -99,7 +93,7 @@ function App() {
             }
           />
           <Route
-            path="/mail"
+            path="/mail/:mailid"
             element={
               <AuthGate>
                 <Mailpage />

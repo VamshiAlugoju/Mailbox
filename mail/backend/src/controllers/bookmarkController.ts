@@ -49,7 +49,7 @@ export async function getMyBookmarks(req: Request, res: Response) {
             sendError(res, { error: "user not found" })
             return
         }
-        const mails = await MailModel.find({ _id: { $in: user?.bookmarks } })
+        const mails = await MailModel.find({ _id: { $in: user?.bookmarks } }).populate("from").populate("to")
         res.status(200).json(mails)
         return;
     } catch (err) {
