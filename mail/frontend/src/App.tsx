@@ -13,6 +13,7 @@ import { Bounce, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Outbox from "./pages/Outbox/Outbox";
 import Mailpage from "./pages/Mailpage/Mailpage";
+import { MailProvider } from "./context/MailProvider";
 
 // const router = createBrowserRouter([
 //   {
@@ -56,68 +57,70 @@ import Mailpage from "./pages/Mailpage/Mailpage";
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<FirstPage />} />
+      <MailProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<FirstPage />} />
 
-          <Route
-            path="/home"
-            element={
-              <AuthGate>
-                <Home />
-              </AuthGate>
-            }
-          ></Route>
-          <Route
-            path="/inbox"
-            element={
-              <AuthGate>
-                <Inbox />
-              </AuthGate>
-            }
-          />
-          <Route
-            path="/compose"
-            element={
-              <AuthGate>
-                <ComposeMail />
-              </AuthGate>
-            }
-          />
-          <Route
-            path="/outbox"
-            element={
-              <AuthGate>
-                <Outbox />
-              </AuthGate>
-            }
-          />
-          <Route
-            path="/mail/:mailid"
-            element={
-              <AuthGate>
-                <Mailpage />
-              </AuthGate>
-            }
-          />
+            <Route
+              path="/home"
+              element={
+                <AuthGate>
+                  <Home />
+                </AuthGate>
+              }
+            ></Route>
+            <Route
+              path="/inbox"
+              element={
+                <AuthGate>
+                  <Inbox />
+                </AuthGate>
+              }
+            />
+            <Route
+              path="/compose"
+              element={
+                <AuthGate>
+                  <ComposeMail />
+                </AuthGate>
+              }
+            />
+            <Route
+              path="/outbox"
+              element={
+                <AuthGate>
+                  <Outbox />
+                </AuthGate>
+              }
+            />
+            <Route
+              path="/mail/:mailid"
+              element={
+                <AuthGate>
+                  <Mailpage />
+                </AuthGate>
+              }
+            />
 
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-        </Routes>
-      </BrowserRouter>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        transition={Bounce}
-      />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+          </Routes>
+        </BrowserRouter>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          transition={Bounce}
+        />
+      </MailProvider>
     </AuthProvider>
   );
 }

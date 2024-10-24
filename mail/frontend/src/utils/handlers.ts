@@ -79,7 +79,7 @@ export async function  getMyBookmarks() {
 export async function  addToBookmarks(bookmarkId :string) {
     try{
         const token = localStorage.getItem("token");
-        const response = await Api.post(`bookmark/add/${bookmarkId}` , {}, {headers:{Authorization:token}});
+        const response = await Api.post(`/bookmark/add/${bookmarkId}` , {}, {headers:{Authorization:token}});
         console.log(response.data)
         const currentuser = JSON.parse( localStorage.getItem("user")!)
         currentuser.bookmarks.push( bookmarkId)
@@ -104,4 +104,14 @@ export async function  removeFromBookmarks(bookmarkId : string) {
         console.log(err)
     }
     
+}
+
+export async function readMailById(MailId : string) {
+    try{
+        const token = localStorage.getItem("token")
+        const response = await Api.put(`/mail/read/${MailId}` , {} , {headers: {Authorization:token}});
+        console.log(response.data)
+    }catch(err){
+        console.log(err)
+    }
 }

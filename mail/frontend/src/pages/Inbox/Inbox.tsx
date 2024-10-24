@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import NavigationBar from "../../componets/NavigationBar";
 import { inbox } from "../../data";
-import { tab } from "@material-tailwind/react";
-import { Loader } from "lucide-react";
+
+import { Loader, Trash2 } from "lucide-react";
 import {
   addToBookmarks,
   getMyBookmarks,
@@ -12,7 +12,9 @@ import {
 } from "../../utils/handlers";
 import { Mail } from "../../utils/types/types";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
 import "./inbox.css";
+import { MailContext } from "../../context/MailProvider";
 
 function Inbox() {
   const tabs = [
@@ -27,7 +29,8 @@ function Inbox() {
   const [isLoading, setIsLoading] = useState(true);
   const [inboxData, setInboxData] = useState<Mail[]>([]);
   const [bookmarks, setBookMarks] = useState<Mail[]>([]);
-
+  const MailCtx = useContext(MailContext);
+  console.log(MailCtx);
   useEffect(() => {
     setIsLoading(true);
     (async () => {
@@ -49,7 +52,7 @@ function Inbox() {
       <NavigationBar />
       {!isLoading ? (
         <div className="bg-blue-50 h-screen  border-yellow-700">
-          <div className="bg-white w-full max-w-7xl mx-auto">
+          <div className="bg-white w-full max-w-7xl mx-auto flex">
             {tabs.map((item, index) => {
               return (
                 <MessageTabs
@@ -60,13 +63,16 @@ function Inbox() {
                     setActiveTabIdx(id);
                   }}
                   idx={index}
+                  unreadcount={
+                    item.name == "Inbox" ? MailCtx.unreadCount : undefined
+                  }
                 />
               );
             })}
           </div>
           <div className="">
             {tabs[activeTabIdx].name == "Inbox" &&
-              inboxData.map((item) => {
+              MailCtx.inbox.map((item) => {
                 return (
                   <MessageListItem
                     key={item._id}
@@ -116,21 +122,24 @@ interface IMessageTabs {
   active: boolean;
   idx: number;
   onClickHandler: (id: number) => void;
+  unreadcount?: number;
 }
 export function MessageTabs({
   name,
   active,
   idx,
   onClickHandler,
+  unreadcount,
 }: IMessageTabs) {
   return (
     <button
-      className={`w-fit border-b-2 ${
+      className={`w-fit border-b-2 flex items-center justify-between ${
         active ? "border-b-blue-600" : "border-b-white"
       }`}
       onClick={() => onClickHandler(idx)}
     >
       <p className="font-medium p-5 px-7"> {name} </p>
+      {unreadcount && <p className="text-blue-500 font-bold">{unreadcount}</p>}
     </button>
   );
 }
@@ -163,20 +172,24 @@ export const MessageListItem = ({
   );
   const [showMessageOptions, setShowMessageOptions] = useState(false);
   const navigate = useNavigate();
+  const MailCtx = useContext(MailContext);
   function handleHover() {
     setShowMessageOptions((prev) => !prev);
   }
 
   return (
     <button
-      onClick={() => {
+      onClick={async () => {
+        if (currentPage == "Inbox" && !read) {
+          MailCtx.readMail(mailId);
+        }
         navigate(`/mail/${mailId}`, { state: { prevPage: currentPage } });
       }}
       className={` w-full max-w-7xl mx-auto block ${
-        !read ? "bg-white" : "bg-blue-50"
+        !read ? "bg-white" : "bg-gray-100"
       }  mailboxitem`}
-      // onMouseEnter={handleHover}
-      // onMouseLeave={handleHover}
+      onMouseEnter={handleHover}
+      onMouseLeave={handleHover}
     >
       <div className="flex items-center gap-4 p-2     ">
         {/* Star button */}
@@ -216,9 +229,19 @@ export const MessageListItem = ({
             </div>
           </div>
         </div>
-        <div className={`${showMessageOptions ? "flex" : "hidden"}`}>
-          <p>delete</p>
-        </div>
+        {currentPage == "Inbox" && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              MailCtx.deleteMail(mailId);
+            }}
+            className={`${
+              showMessageOptions ? "flex" : "hidden"
+            } hover:bg-gray-300 hover:rounded-2xl hover:bg-gray-300`}
+          >
+            <Trash2 color="red" />
+          </button>
+        )}
       </div>
     </button>
   );
